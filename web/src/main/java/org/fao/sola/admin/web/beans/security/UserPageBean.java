@@ -13,6 +13,8 @@ import javax.inject.Named;
 import org.fao.sola.admin.web.beans.AbstractBackingBean;
 import org.fao.sola.admin.web.beans.helpers.ErrorKeys;
 import org.fao.sola.admin.web.beans.helpers.MessageProvider;
+import org.sola.admin.opentenure.services.ejbs.claim.businesslogic.ClaimAdminEJBLocal;
+import org.sola.admin.opentenure.services.ejbs.claim.entities.AdministrativeBoundary;
 import org.sola.common.StringUtility;
 import org.sola.services.common.EntityAction;
 import org.sola.admin.services.ejb.search.businesslogic.SearchAdminEJBLocal;
@@ -48,10 +50,29 @@ public class UserPageBean extends AbstractBackingBean {
     @EJB
     SearchAdminEJBLocal searchEjb;
 
+    @EJB
+    ClaimAdminEJBLocal claimEjb;
+    
     public User getUser() {
         return user;
     }
 
+    public AdministrativeBoundary[] getBoundaries(String typeCode, String statusCode, boolean addDummy) {
+        List<AdministrativeBoundary> boundaries = claimEjb.getAdministrativeBoundaries(statusCode, typeCode);
+        if (boundaries == null) {
+            boundaries = new ArrayList<>();
+        }
+
+        if (addDummy) {
+            AdministrativeBoundary dummy = new AdministrativeBoundary();
+            dummy.setId("");
+            dummy.setName("");
+            boundaries.add(0, dummy);
+        }
+
+        return boundaries.toArray(new AdministrativeBoundary[boundaries.size()]);
+    }
+    
     public List<UserSearchResult> getSearchResults() {
         return searchResults;
     }
